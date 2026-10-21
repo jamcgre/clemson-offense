@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: clemson-offense-db
+    environment:
+      POSTGRES_USER: clemson
+      POSTGRES_PASSWORD: clemson
+      POSTGRES_DB: clemson_offense
+    ports:
+      - "5433:5432"
+    volumes:
+      - clemson_offense_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clemson -d clemson_offense"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  clemson_offense_pg:
