@@ -1,6 +1,6 @@
 # Clemson Offense Lab
 
-A React and Node app that stores Clemson’s offense from 2018 through 2026 and compares it with the 2018–2020 peak. The subject is the drop after that peak. The code is a small data pipeline, a typed API, and a report you can defend in an interview.
+A React and Node app that stores Clemson’s offense from 2008 through 2026 and compares it with the 2018–2020 peak. The subject is the drop after that peak. The code is a small data pipeline, a typed API, and a report you can defend in an interview.
 
 ## Architecture
 
@@ -40,7 +40,7 @@ npm run dev:client
 
 Open http://localhost:5173. The API listens on http://localhost:3001. Vite proxies `/api` to it.
 
-`npm run ingest -- 2024` reloads one season. The default is 2018 through 2026. The API caches the database read for 15 seconds.
+`npm run ingest -- 2024` reloads one season. The default is 2008 through 2026. The API caches the database read for 15 seconds.
 
 The Docker database user and password in `docker-compose.yml` are for this local database only.
 
