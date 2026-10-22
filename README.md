@@ -2,6 +2,8 @@
 
 A React and Node app that stores Clemson’s offense from 2008 through 2026 and compares it with the 2018–2020 peak. The subject is the drop after that peak. The code is a small data pipeline, a typed API, and a report you can defend in an interview.
 
+![Overview of Clemson’s offense from 2008 through 2026](Screenshot%202026-10-21%20235152.png)
+
 ## Architecture
 
 ```mermaid
@@ -48,7 +50,7 @@ If you change `server/src/schema.sql` after the first run, reset the volume with
 
 ## Pages
 
-- **Overview** leads with the latest season’s findings, then a trend chart and a table of every season.
+- **Overview** shows the season trend and a table of every season.
 - **Season** shows down, pass/rush, and red-zone splits, plus the game log.
 - **Method** defines every measure and the cutoff that creates a finding.
 
@@ -74,7 +76,3 @@ These rates are not opponent-adjusted, and garbage time stays in. They describe 
 - `GET /api/seasons/:year` — splits for that season: down, pass or rush, red zone
 - `GET /api/seasons/:year/games` — game log
 - `GET /api/diagnosis` — baseline versus later seasons, with the findings
-
-## What I would add next
-
-Opponent adjustment, a garbage-time filter, and a split by quarterback. Those are the first questions a skeptic would ask after reading the findings.
