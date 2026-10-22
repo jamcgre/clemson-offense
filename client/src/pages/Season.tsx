@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getJson } from "../api";
 import { SetupNotice } from "../components/SetupNotice";
-import { fixed, formatDate, numberGap, opponentLabel, pct, rateGap, record, scoreLine, weekLabel } from "../format";
+import { fixed, formatDate, opponentLabel, pct, record, scoreLine, weekLabel } from "../format";
 import type { GameLogRow, YearDetail } from "../types";
 
 export function Season() {
@@ -42,7 +42,7 @@ export function Season() {
   }
   if (!detail || !games) return <p className="status">Loading {year}…</p>;
 
-  const { summary, baseline } = detail;
+  const { summary } = detail;
 
   return (
     <>
@@ -52,13 +52,12 @@ export function Season() {
         {summary.scrimmagePlays > 0 ? ` · ${summary.scrimmagePlays} scrimmage plays` : ""}
       </p>
       <h1>{detail.season} offense</h1>
-      <p className="lede">Compared with the {detail.baselineLabel} average.</p>
 
       <div className="tiles">
-        <Tile label="Success rate" value={pct(summary.successRate)} gap={rateGap(summary.successRate, baseline.successRate)} />
-        <Tile label="Explosive rate" value={pct(summary.explosiveRate)} gap={rateGap(summary.explosiveRate, baseline.explosiveRate)} />
-        <Tile label="Points per drive" value={fixed(summary.pointsPerDrive)} gap={numberGap(summary.pointsPerDrive, baseline.pointsPerDrive)} />
-        <Tile label="PPA per play" value={fixed(summary.ppa)} gap={numberGap(summary.ppa, baseline.ppa)} />
+        <Tile label="Success rate" value={pct(summary.successRate)} />
+        <Tile label="Explosive rate" value={pct(summary.explosiveRate)} />
+        <Tile label="Points per drive" value={fixed(summary.pointsPerDrive)} />
+        <Tile label="PPA per play" value={fixed(summary.ppa)} />
       </div>
 
       <section className="panel">
@@ -84,7 +83,7 @@ export function Season() {
         <h2>Red zone</h2>
         <div className="tiles compact">
           <Tile label="Trips" value={String(detail.splits.redZone.trips)} />
-          <Tile label="Score rate" value={pct(detail.splits.redZone.scoreRate)} gap={rateGap(detail.splits.redZone.scoreRate, baseline.redZoneScoreRate)} />
+          <Tile label="Score rate" value={pct(detail.splits.redZone.scoreRate)} />
           <Tile label="Touchdown rate" value={pct(detail.splits.redZone.tdRate)} />
           <Tile label="Success rate" value={pct(detail.splits.redZone.successRate)} />
         </div>
@@ -135,13 +134,11 @@ export function Season() {
   );
 }
 
-function Tile({ label, value, gap }: { label: string; value: string; gap?: string | null }) {
-  const worse = Boolean(gap && gap.trim().startsWith("-"));
+function Tile({ label, value }: { label: string; value: string }) {
   return (
     <article className="tile">
       <h3>{label}</h3>
       <p className="tile-value">{value}</p>
-      {gap ? <p className={worse ? "delta bad" : "delta"}>{gap} vs peak</p> : null}
     </article>
   );
 }

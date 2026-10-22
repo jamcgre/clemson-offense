@@ -27,49 +27,13 @@ export function Overview() {
   if (!diagnosis) return <p className="status">Loading the offense report…</p>;
   if (diagnosis.seasons.length === 0) return <SetupNotice empty />;
 
-  const latest = [...diagnosis.seasons].sort((a, b) => a.season - b.season).at(-1);
-  const latestFindings = diagnosis.findings.filter((finding) => finding.season === latest?.season);
-  const earlier = diagnosis.findings.filter((finding) => finding.season !== latest?.season);
-
   return (
     <>
-      <p className="kicker">2018–2026</p>
-      <h1>What changed after the peak</h1>
-      <p className="lede">{diagnosis.summary}</p>
-
-      <section className="panel">
-        <h2>{latest ? `${latest.season} findings` : "Findings"}</h2>
-        {latestFindings.length === 0 ? (
-          <p className="muted">No measure fell far enough past the {diagnosis.baselineLabel} baseline to flag.</p>
-        ) : (
-          <ol className="findings">
-            {latestFindings.map((finding) => (
-              <li key={finding.id}>
-                <h3>{finding.label}</h3>
-                <p>{finding.summary}</p>
-              </li>
-            ))}
-          </ol>
-        )}
-        {earlier.length > 0 && (
-          <details className="earlier">
-            <summary>Earlier seasons since 2020 ({earlier.length})</summary>
-            <ul>
-              {earlier.map((finding) => (
-                <li key={finding.id}>{finding.summary}</li>
-              ))}
-            </ul>
-          </details>
-        )}
-      </section>
+      <p className="kicker">2008–2026</p>
+      <h1>Clemson offense</h1>
 
       <TrendChart seasons={diagnosis.seasons} baseline={diagnosis.baseline} baselineLabel={diagnosis.baselineLabel} />
-      <SeasonTable
-        seasons={diagnosis.seasons}
-        baseline={diagnosis.baseline}
-        baselineLabel={diagnosis.baselineLabel}
-        findings={diagnosis.findings}
-      />
+      <SeasonTable seasons={diagnosis.seasons} baseline={diagnosis.baseline} baselineLabel={diagnosis.baselineLabel} />
     </>
   );
 }
