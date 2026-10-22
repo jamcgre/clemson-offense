@@ -3,13 +3,13 @@ import { yearsFromArgv } from "./ingestYears";
 import { parseGame, parsePlay, parseSeasonStats } from "./parseApi";
 
 describe("yearsFromArgv", () => {
-  it("defaults to 2018 through 2026", () => {
-    expect(yearsFromArgv([])).toEqual([2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]);
+  it("defaults to 2008 through 2026", () => {
+    expect(yearsFromArgv([])).toEqual([2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]);
   });
 
   it("keeps requested seasons inside that window", () => {
-    expect(yearsFromArgv(["2024", "2010", "2025"])).toEqual([2024, 2025]);
-    expect(() => yearsFromArgv(["1999"])).toThrow(/2018/);
+    expect(yearsFromArgv(["2024", "2010", "2007", "2025"])).toEqual([2024, 2010, 2025]);
+    expect(() => yearsFromArgv(["1999"])).toThrow(/2008/);
   });
 });
 

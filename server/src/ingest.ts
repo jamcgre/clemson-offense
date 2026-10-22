@@ -1,3 +1,5 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { TEAM } from "./constants";
 import { cfbdList } from "./cfbd";
 import { pool } from "./db";
@@ -13,8 +15,7 @@ type YearPayload = {
   season: SeasonPpaRow | null;
 };
 
-async function main(): Promise<void> {
-  const years = yearsFromArgv(process.argv.slice(2));
+export async function ingestSeasons(years: number[]): Promise<void> {
   console.log(`Loading Clemson offense for ${years.join(", ")}.`);
 
   for (const year of years) {
@@ -91,11 +92,19 @@ function dedupe<T extends { id: number | string }>(rows: T[]): T[] {
   return [...new Map(rows.map((row) => [row.id, row])).values()];
 }
 
-main()
-  .catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await pool.end();
-  });
+function isDirectRun(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  return path.resolve(fileURLToPath(import.meta.url)) === path.resolve(entry);
+}
+
+if (isDirectRun()) {
+  ingestSeasons(yearsFromArgv(process.argv.slice(2)))
+    .catch((error: unknown) => {
+      console.error(error instanceof Error ? error.message : error);
+      process.exitCode = 1;
+    })
+    .finally(async () => {
+      await pool.end();
+    });
+}

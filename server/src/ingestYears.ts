@@ -7,10 +7,10 @@ export function yearsFromArgv(argv: string[]): number[] {
   const allowed = requested.filter((year) => SEASONS.includes(year));
   const rejected = requested.filter((year) => !SEASONS.includes(year));
   if (rejected.length > 0) {
-    console.warn(`Skipping years outside 2018–2026: ${rejected.join(", ")}`);
+    console.warn(`Skipping years outside 2008–2026: ${rejected.join(", ")}`);
   }
   if (allowed.length === 0) {
-    throw new Error("No valid seasons to ingest. Use years from 2018 through 2026.");
+    throw new Error("No valid seasons to ingest. Use years from 2008 through 2026.");
   }
   return allowed;
 }
