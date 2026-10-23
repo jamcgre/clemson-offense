@@ -33,6 +33,8 @@ export type DriveRow = {
   endYardsToGoal: number | null;
   startOffenseScore: number | null;
   endOffenseScore: number | null;
+  startDefenseScore: number | null;
+  startPeriod: number | null;
   scoring: boolean;
 };
 

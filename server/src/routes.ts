@@ -3,6 +3,8 @@ import { buildGameLog, buildSplits, buildSnapshot, seasonExists } from "./aggreg
 import { explainDatabaseError, queryDataset } from "./queries";
 import type { Dataset } from "./types";
 import { diagnose } from "./diagnosis";
+import { getNonGarbageTimeData, isGarbageTime } from "./metrics";
+import type { SeasonSnapshot } from "./types";
 
 const CACHE_MS = 15_000;
 
@@ -18,7 +20,7 @@ export function createApp() {
       const dataset = await loadDataset();
       const seasons = [...seasonYears(dataset)]
         .sort((a, b) => a - b)
-        .map((year) => snapshotFor(dataset, year));
+        .map((year) => snapshotFor(dataset, year).summary);
       res.json({ seasons });
     } catch (error) {
       res.status(503).json({ error: explainDatabaseError(error) });
@@ -38,7 +40,10 @@ export function createApp() {
         return;
       }
       const slice = sliceYear(dataset, year);
-      res.json({ season: year, games: buildGameLog(slice.games, slice.plays, slice.drives) });
+      const { drives: garbageDrives, plays: garbagePlays } = getNonGarbageTimeData(slice.drives, slice.plays);
+      const gamesExcludingGarbageTime = buildGameLog(slice.games, garbagePlays, garbageDrives);
+      const gamesIncludingGarbageTime = buildGameLog(slice.games, slice.plays, slice.drives);
+      res.json({ season: year, games: gamesIncludingGarbageTime, gamesExcludingGarbageTime });
     } catch (error) {
       res.status(503).json({ error: explainDatabaseError(error) });
     }
@@ -59,20 +64,35 @@ export function createApp() {
       const snapshots = [...seasonYears(dataset)]
         .sort((a, b) => a - b)
         .map((item) => snapshotFor(dataset, item));
-      const diagnosis = diagnose({ seasons: snapshots });
-      const summary = snapshots.find((item) => item.season === year);
-      if (!summary) {
+
+      const fullSummaries = snapshots.map((item) => item.summary);
+      const filteredSummaries = snapshots.map((item) => item.summaryExcludingGarbageTime);
+
+      const diagnosis = diagnose({ seasons: fullSummaries });
+      const filteredDiagnosis = diagnose({ seasons: filteredSummaries });
+
+      const summary = fullSummaries.find((item) => item.season === year);
+      const summaryExcludingGarbageTime = filteredSummaries.find((item) => item.season === year);
+      
+      if (!summary || !summaryExcludingGarbageTime) {
         res.status(404).json({ error: `No stats stored for ${year}.` });
         return;
       }
+
       const slice = sliceYear(dataset, year);
+      const filtered = getNonGarbageTimeData(slice.drives, slice.plays);
+
       res.json({
         season: year,
         partial: summary.partial,
         summary,
+        summaryExcludingGarbageTime,
         baseline: diagnosis.baseline,
         baselineLabel: diagnosis.baselineLabel,
         splits: buildSplits(slice.plays, slice.drives),
+        splitsExcludingGarbageTime: buildSplits(filtered.plays, filtered.drives),
+        diagnosis,
+        diagnosisExcludingGarbageTime: filteredDiagnosis,
       });
     } catch (error) {
       res.status(503).json({ error: explainDatabaseError(error) });
@@ -82,10 +102,14 @@ export function createApp() {
   app.get("/api/diagnosis", async (_req, res) => {
     try {
       const dataset = await loadDataset();
-      const seasons = [...seasonYears(dataset)]
+      const snapshots = [...seasonYears(dataset)]
         .sort((a, b) => a - b)
         .map((year) => snapshotFor(dataset, year));
-      res.json(diagnose({ seasons }));
+      
+      const diagnosis = diagnose({ seasons: snapshots.map((item) => item.summary) });
+      const diagnosisExcludingGarbageTime = diagnose({ seasons: snapshots.map((item) => item.summaryExcludingGarbageTime) });
+
+      res.json({ ...diagnosis, diagnosisExcludingGarbageTime });
     } catch (error) {
       res.status(503).json({ error: explainDatabaseError(error) });
     }
@@ -123,9 +147,15 @@ function sliceYear(dataset: Dataset, year: number) {
   };
 }
 
-function snapshotFor(dataset: Dataset, year: number) {
+function snapshotFor(dataset: Dataset, year: number): {summary: SeasonSnapshot, summaryExcludingGarbageTime: SeasonSnapshot} {
   const slice = sliceYear(dataset, year);
-  return buildSnapshot(year, slice.plays, slice.drives, slice.games, slice.ppa);
+  const { drives: garbageDrives, plays: garbagePlays } = getNonGarbageTimeData(slice.drives, slice.plays);
+  const summaryExcludingGarbageTime = buildSnapshot(year, garbagePlays, garbageDrives, slice.games, slice.ppa);
+  const summaryIncludingGarbageTime = buildSnapshot(year, slice.plays, slice.drives, slice.games, slice.ppa);
+  return {
+    summary: summaryIncludingGarbageTime,
+    summaryExcludingGarbageTime: summaryExcludingGarbageTime,
+  };
 }
 
 function parseYear(value: string | undefined): number | null {

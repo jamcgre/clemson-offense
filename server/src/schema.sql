@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS drives (
   end_yards_to_goal INTEGER,
   start_offense_score INTEGER,
   end_offense_score INTEGER,
+  start_defense_score INTEGER,
+  start_period INTEGER,
   scoring BOOLEAN NOT NULL DEFAULT FALSE
 );
 
