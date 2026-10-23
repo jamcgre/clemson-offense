@@ -40,6 +40,7 @@ export function parseDrive(row: Record<string, unknown>, season: number): DriveR
   if (!id || gameId == null || !offense || !defense) return null;
   if (offense.toLowerCase() !== TEAM.toLowerCase()) return null;
 
+
   return {
     id,
     gameId,
@@ -54,6 +55,8 @@ export function parseDrive(row: Record<string, unknown>, season: number): DriveR
     endYardsToGoal: toNumber(read(row, "endYardsToGoal", "end_yards_to_goal")),
     startOffenseScore: toNumber(read(row, "startOffenseScore", "start_offense_score")),
     endOffenseScore: toNumber(read(row, "endOffenseScore", "end_offense_score")),
+    startDefenseScore: toNumber(read(row, "startDefenseScore", "start_defense_score")),
+    startPeriod: toNumber(read(row, "startPeriod", "start_period")),
     scoring: toBoolean(read(row, "scoring")),
   };
 }

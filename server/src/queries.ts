@@ -91,6 +91,8 @@ export async function replaceSeason(
         "end_yards_to_goal",
         "start_offense_score",
         "end_offense_score",
+        "start_defense_score",
+        "start_period",
         "scoring",
       ],
       data.drives.map((drive) => [
@@ -107,6 +109,8 @@ export async function replaceSeason(
         drive.endYardsToGoal,
         drive.startOffenseScore,
         drive.endOffenseScore,
+        drive.startDefenseScore,
+        drive.startPeriod,
         drive.scoring,
       ]),
     );
@@ -245,6 +249,8 @@ function mapDrive(row: Record<string, unknown>): DriveRow {
     endYardsToGoal: toNumber(row.end_yards_to_goal),
     startOffenseScore: toNumber(row.start_offense_score),
     endOffenseScore: toNumber(row.end_offense_score),
+    startDefenseScore: toNumber(row.start_defense_score),
+    startPeriod: toNumber(row.start_period),
     scoring: toBoolean(row.scoring),
   };
 }

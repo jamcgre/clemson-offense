@@ -1,31 +1,37 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
 import { getJson } from "../api";
 import { SetupNotice } from "../components/SetupNotice";
 import { fixed, formatDate, opponentLabel, pct, record, scoreLine, weekLabel } from "../format";
 import type { GameLogRow, YearDetail } from "../types";
 
+type GameLogResponse = {
+  games: GameLogRow[];
+  gamesExcludingGarbageTime: GameLogRow[];
+};
+
 export function Season() {
   const { year: yearParam } = useParams();
   const year = yearParam && /^\d{4}$/.test(yearParam) ? Number(yearParam) : null;
+  const { hideGarbageTime } = useOutletContext<{ hideGarbageTime: boolean }>();
   const [detail, setDetail] = useState<YearDetail | null>(null);
-  const [games, setGames] = useState<GameLogRow[] | null>(null);
+  const [gameLog, setGameLog] = useState<GameLogResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (year == null) return;
     let cancelled = false;
     setDetail(null);
-    setGames(null);
+    setGameLog(null);
     setError(null);
     Promise.all([
       getJson<YearDetail>(`/api/seasons/${year}`),
-      getJson<{ games: GameLogRow[] }>(`/api/seasons/${year}/games`),
+      getJson<GameLogResponse>(`/api/seasons/${year}/games`),
     ])
-      .then(([yearDetail, gameLog]) => {
+      .then(([yearDetail, log]) => {
         if (cancelled) return;
         setDetail(yearDetail);
-        setGames(gameLog.games);
+        setGameLog(log);
       })
       .catch((caught: Error) => {
         if (!cancelled) setError(caught.message);
@@ -40,15 +46,20 @@ export function Season() {
     const needsSetup = /postgres|database|api is not running|could not be reached/i.test(error);
     return needsSetup ? <SetupNotice message={error} /> : <p className="status">{error}</p>;
   }
-  if (!detail || !games) return <p className="status">Loading {year}…</p>;
+  if (!detail || !gameLog) return <p className="status">Loading {year}…</p>;
 
-  const { summary } = detail;
+  const full = detail.summary;
+  const summary = hideGarbageTime ? detail.summaryExcludingGarbageTime : full;
+  const splits =
+    hideGarbageTime && detail.splitsExcludingGarbageTime ? detail.splitsExcludingGarbageTime : detail.splits;
+  const games =
+    hideGarbageTime && gameLog.gamesExcludingGarbageTime ? gameLog.gamesExcludingGarbageTime : gameLog.games;
 
   return (
     <>
       <p className="kicker">
-        {record(summary.wins, summary.losses, summary.ties)}
-        {summary.partial ? " · in progress" : ""}
+        {record(full.wins, full.losses, full.ties)}
+        {full.partial ? " · in progress" : ""}
         {summary.scrimmagePlays > 0 ? ` · ${summary.scrimmagePlays} scrimmage plays` : ""}
       </p>
       <h1>{detail.season} offense</h1>
@@ -57,13 +68,13 @@ export function Season() {
         <Tile label="Success rate" value={pct(summary.successRate)} />
         <Tile label="Explosive rate" value={pct(summary.explosiveRate)} />
         <Tile label="Points per drive" value={fixed(summary.pointsPerDrive)} />
-        <Tile label="PPA per play" value={fixed(summary.ppa)} />
+        <Tile label="PPA per play" value={fixed(full.ppa)} />
       </div>
 
       <section className="panel">
         <h2>By down</h2>
         <SplitTable
-          rows={detail.splits.byDown.map((row) => ({
+          rows={splits.byDown.map((row) => ({
             label: row.label,
             plays: row.plays,
             successRate: row.successRate,
@@ -76,16 +87,16 @@ export function Season() {
 
       <section className="panel">
         <h2>Pass and rush</h2>
-        <SplitTable rows={detail.splits.byPlayType} />
+        <SplitTable rows={splits.byPlayType} />
       </section>
 
       <section className="panel">
         <h2>Red zone</h2>
         <div className="tiles compact">
-          <Tile label="Trips" value={String(detail.splits.redZone.trips)} />
-          <Tile label="Score rate" value={pct(detail.splits.redZone.scoreRate)} />
-          <Tile label="Touchdown rate" value={pct(detail.splits.redZone.tdRate)} />
-          <Tile label="Success rate" value={pct(detail.splits.redZone.successRate)} />
+          <Tile label="Trips" value={String(splits.redZone.trips)} />
+          <Tile label="Score rate" value={pct(splits.redZone.scoreRate)} />
+          <Tile label="Touchdown rate" value={pct(splits.redZone.tdRate)} />
+          <Tile label="Success rate" value={pct(splits.redZone.successRate)} />
         </div>
       </section>
 

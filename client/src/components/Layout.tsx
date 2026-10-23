@@ -1,8 +1,12 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useSeasons } from "../seasons";
+import React from "react";
 
 export function Layout() {
   const { seasons } = useSeasons();
+
+  const [hideGarbageTime, setHideGarbageTime] = React.useState<boolean>(false);
+
 
   return (
     <>
@@ -24,6 +28,10 @@ export function Layout() {
       </header>
       {seasons.length > 0 && (
         <div className="year-bar">
+          <label>
+            <input type="checkbox" checked={hideGarbageTime} onChange={() => setHideGarbageTime(!hideGarbageTime)} />
+            Hide garbage time
+          </label>
           <nav className="wrap years" aria-label="Seasons">
             {seasons.map((season) => (
               <NavLink key={season.season} to={`/season/${season.season}`}>
@@ -35,7 +43,7 @@ export function Layout() {
         </div>
       )}
       <main id="content" className="wrap">
-        <Outlet />
+        <Outlet context={{ hideGarbageTime }} />
       </main>
       <footer className="site-footer">
         <p className="wrap">

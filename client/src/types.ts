@@ -52,6 +52,7 @@ export type Diagnosis = {
   seasons: SeasonSnapshot[];
   findings: Finding[];
   summary: string;
+  diagnosisExcludingGarbageTime?: Diagnosis;
 };
 
 export type RateBlock = {
@@ -68,6 +69,7 @@ export type YearDetail = {
   season: number;
   partial: boolean;
   summary: SeasonSnapshot;
+  summaryExcludingGarbageTime: SeasonSnapshot;
   baseline: MetricAverages;
   baselineLabel: string;
   splits: {
@@ -78,7 +80,9 @@ export type YearDetail = {
       scoreRate: number | null;
       tdRate: number | null;
     };
-  };
+  };  
+  splitsExcludingGarbageTime?: YearDetail['splits'];
+  diagnosisExcludingGarbageTime?: Diagnosis;
 };
 
 export type GameLogRow = {

@@ -150,3 +150,26 @@ export function gameResult(game: Pick<GameRow, "homeTeam" | "awayTeam" | "homePo
   if (ours < theirs) return "L";
   return "T";
 }
+
+export function isGarbageTime(drive: Pick<DriveRow, "startOffenseScore" | "startDefenseScore" | "startPeriod">): boolean | null {
+  if (drive.startOffenseScore == null || drive.startDefenseScore == null || drive.startPeriod == null) return null;
+  if (drive.startPeriod < 4) return false;
+  if (drive.startOffenseScore >= drive.startDefenseScore + 17) return true;
+  return false;
+}
+
+export function getNonGarbageTimeData(seasonDrives: DriveRow[], seasonPlays: PlayRow[]): { drives: DriveRow[], plays: PlayRow[] } {
+  const notGarbageTimeDrives: DriveRow[] = [];
+  const notGarbageTimePlays: PlayRow[] = [];
+  for (const drive of seasonDrives) {
+    if (!isGarbageTime(drive)) {
+      notGarbageTimeDrives.push(drive);
+      for (const play of seasonPlays) {
+        if (play.driveId === drive.id) {
+          notGarbageTimePlays.push(play);
+        }
+      }
+    }
+  } 
+  return { drives: notGarbageTimeDrives, plays: notGarbageTimePlays };
+}
