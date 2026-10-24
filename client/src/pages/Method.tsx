@@ -130,9 +130,11 @@ export function Method() {
 
         <h2>What this leaves out</h2>
         <p>
-          Nothing here is opponent-adjusted. Garbage time stays in. Schedule strength, quarterback, and play-caller are
-          not separated. A bad defense on the other side can make an ordinary offense look efficient, and a brutal
-          schedule can make a good one look worse. The rules describe what changed. They do not prove why.
+          The offense rates are not rewritten for the opponent. Opponent defense PPA sits beside them, and a lower
+          number is a tougher defense. Garbage time can be hidden from the header. Record, season PPA, and havoc stay
+          on the full game. Quarterback and play-caller are not separated. A bad defense on the other side can make an
+          ordinary offense look efficient, and a brutal schedule can make a good one look worse. The rules describe
+          what changed. They do not prove why.
         </p>
       </section>
     </>
