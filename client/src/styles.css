@@ -88,11 +88,30 @@ p { margin: 0; }
   background: var(--purple-deep);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+.year-bar-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0 6px;
+}
+.garbage-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  color: #f6f1e8;
+  font-size: 0.92rem;
+}
+.garbage-toggle input {
+  accent-color: var(--orange);
+  width: 1rem;
+  height: 1rem;
+}
 .years {
   display: flex;
   gap: 4px;
   overflow-x: auto;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 .years a {
   color: #f6f1e8;

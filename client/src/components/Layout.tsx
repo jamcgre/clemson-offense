@@ -28,18 +28,20 @@ export function Layout() {
       </header>
       {seasons.length > 0 && (
         <div className="year-bar">
-          <label>
-            <input type="checkbox" checked={hideGarbageTime} onChange={() => setHideGarbageTime(!hideGarbageTime)} />
-            Hide garbage time
-          </label>
-          <nav className="wrap years" aria-label="Seasons">
-            {seasons.map((season) => (
-              <NavLink key={season.season} to={`/season/${season.season}`}>
-                {season.season}
-                {season.partial ? <span className="year-note"> live</span> : null}
-              </NavLink>
-            ))}
-          </nav>
+          <div className="wrap year-bar-inner">
+            <label className="garbage-toggle">
+              <input type="checkbox" checked={hideGarbageTime} onChange={() => setHideGarbageTime(!hideGarbageTime)} />
+              Hide garbage time
+            </label>
+            <nav className="years" aria-label="Seasons">
+              {seasons.map((season) => (
+                <NavLink key={season.season} to={`/season/${season.season}`}>
+                  {season.season}
+                  {season.partial ? <span className="year-note"> live</span> : null}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
         </div>
       )}
       <main id="content" className="wrap">
