@@ -2,6 +2,7 @@ services:
   - type: web
     name: clemson-offense
     runtime: docker
+    plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/seasons
     envVars:
@@ -16,5 +17,6 @@ services:
 
 databases:
   - name: clemson-offense-db
+    plan: free
     databaseName: clemson_offense
     user: clemson
