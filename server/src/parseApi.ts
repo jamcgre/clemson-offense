@@ -14,6 +14,7 @@ export function parseGame(row: Record<string, unknown>): GameRow | null {
   const awayPoints = toNumber(read(row, "awayPoints", "away_points"));
   const completedRaw = read(row, "completed");
   const seasonType = toText(read(row, "seasonType", "season_type")) ?? "regular";
+  const opponentDefensePpa = null;
 
   return {
     id,
@@ -28,6 +29,7 @@ export function parseGame(row: Record<string, unknown>): GameRow | null {
     venue: toText(read(row, "venue")),
     neutralSite: toBoolean(read(row, "neutralSite", "neutral_site")),
     completed: completedRaw == null ? homePoints != null && awayPoints != null : toBoolean(completedRaw),
+    opponentDefensePpa,
   };
 }
 
@@ -142,4 +144,23 @@ function pickTeam(rows: Record<string, unknown>[]): Record<string, unknown> | nu
   if (match) return match;
   const unlabeled = rows.find((row) => toText(read(row, "team")) == null);
   return unlabeled ?? null;
+}
+
+export function defenseOverallByTeam(rows: Record<string, unknown>[]): Map<string, number | null> {
+  const ratings = new Map<string, number | null>();
+  for (const row of rows) {
+    const team = toText(read(row, "team"));
+    if (!team) continue;
+    const defense = asRecord(read(row, "defense"));
+    ratings.set(team.toLowerCase(), toNumber(defense ? read(defense, "overall") : null));
+  }
+  return ratings;
+}
+
+export function withOpponentDefense(games: GameRow[], ratings: Map<string, number | null>): GameRow[] {
+  return games.map((game) => {
+    const opponent = game.homeTeam.toLowerCase() === TEAM.toLowerCase() ? game.awayTeam : game.homeTeam;
+    const rating = ratings.get(opponent.toLowerCase());
+    return {...game, opponentDefensePpa: rating == undefined ? null : rating}
+  });
 }

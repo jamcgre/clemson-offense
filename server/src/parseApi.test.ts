@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { yearsFromArgv } from "./ingestYears";
-import { parseGame, parsePlay, parseSeasonStats } from "./parseApi";
+import { defenseOverallByTeam, parseGame, parsePlay, parseSeasonStats, withOpponentDefense } from "./parseApi";
 
 describe("yearsFromArgv", () => {
   it("defaults to 2008 through 2026", () => {
@@ -78,5 +78,34 @@ describe("parseApi", () => {
     expect(season?.overall).toBe(0.22);
     expect(season?.havocTotal).toBe(0.17);
     expect(season?.cumulativePassing).toBe(80);
+  });
+
+  it("stores the opponent's defense.overall and skips a team missing from the list", () => {
+    const atGeorgia = parseGame({
+      id: 1,
+      season: 2024,
+      week: 1,
+      homeTeam: "Georgia",
+      awayTeam: "Clemson",
+      homePoints: 10,
+      awayPoints: 24,
+    });
+    const wofford = parseGame({
+      id: 2,
+      season: 2024,
+      week: 2,
+      homeTeam: "Clemson",
+      awayTeam: "Wofford",
+    });
+    if (!atGeorgia || !wofford) throw new Error("expected both games to parse");
+
+    const ratings = defenseOverallByTeam([
+      { team: "Clemson", defense: { overall: 0.11 } },
+      { team: "Georgia", defense: { overall: -0.08 } },
+    ]);
+    const [georgia, missing] = withOpponentDefense([atGeorgia, wofford], ratings);
+
+    expect(georgia.opponentDefensePpa).toBe(-0.08);
+    expect(missing.opponentDefensePpa).toBeNull();
   });
 });

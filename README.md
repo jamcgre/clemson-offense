@@ -42,7 +42,7 @@ npm run dev:client
 
 Open http://localhost:5173. The API listens on http://localhost:3001. Vite proxies `/api` to it.
 
-`npm run ingest -- 2024` reloads one season. The default is 2008 through 2026. The API caches the database read for 15 seconds.
+`npm run ingest -w server -- 2024` reloads one season. The default is 2008 through 2026. The API caches the database read for 15 seconds.
 
 The Docker database user and password in `docker-compose.yml` are for this local database only.
 
@@ -65,10 +65,17 @@ Scrimmage plays are rushes and passes, including sacks and interceptions thrown.
 - **Red zone score rate:** drives that start inside the opponent 20, or have a scrimmage play there, and end in a touchdown or made field goal.
 - **PPA per play:** CollegeFootballData’s season offensive predicted points added. If it is missing, the average PPA on scrimmage plays is used. The game log always uses the play average.
 - **Havoc rate allowed:** CollegeFootballData’s rate of tackles for loss, forced fumbles, and passes defended. Higher is worse. It is stored on the `season_ppa` row with the season PPA.
+- **Opponent defense PPA:** CollegeFootballData’s `defense.overall` for that game’s opponent, the predicted points added per play by offenses facing that defense. Lower is a tougher defense. The season number averages games that have a rating and skips an unrated opponent. It is stored on the game as `opponent_defense_ppa`. The overview baseline for this column is the unweighted average of the 2018, 2019, and 2020 season values. Hiding garbage time does not change it.
 
-The baseline is the unweighted average of 2018, 2019, and 2020. A later season is flagged only when the gap clears a cutoff and the sample is large enough. The cutoffs are in `server/src/diagnosis.ts` and on the Method page.
+The baseline for the offense rates is the unweighted average of 2018, 2019, and 2020. A later season is flagged only when the gap clears a cutoff and the sample is large enough. The cutoffs are in `server/src/diagnosis.ts` and on the Method page. Opponent defense PPA is not one of those findings.
 
-These rates are not opponent-adjusted, and garbage time stays in. They describe what changed. They do not prove why.
+The offense rates are not rewritten for opponent. Opponent defense PPA is shown beside them. Garbage time can be hidden from the header. The report describes what changed. It does not prove why.
+
+2024, 2025, and 2026 have no opponent defense rating yet. The CollegeFootballData monthly call quota ran out while those seasons were loading, and 2008–2023 are already filled. When the quota resets, reload only the missing seasons:
+
+```bash
+npm run ingest -w server -- 2024 2025 2026
+```
 
 ## API
 

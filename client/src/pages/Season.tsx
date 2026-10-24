@@ -69,6 +69,7 @@ export function Season() {
         <Tile label="Explosive rate" value={pct(summary.explosiveRate)} />
         <Tile label="Points per drive" value={fixed(summary.pointsPerDrive)} />
         <Tile label="PPA per play" value={fixed(full.ppa)} />
+        <Tile label={`Opp. defense PPA (${full.ratedGames} games)`} value={fixed(full.opponentDefensePpa, 2)} />
       </div>
 
       <section className="panel">
@@ -119,6 +120,7 @@ export function Season() {
                   <th scope="col">Explosive</th>
                   <th scope="col">Pts/drive</th>
                   <th scope="col">Avg PPA</th>
+                  <th scope="col">Opp. defense PPA</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,6 +135,7 @@ export function Season() {
                     <td>{pct(game.explosiveRate)}</td>
                     <td>{fixed(game.pointsPerDrive)}</td>
                     <td>{fixed(game.avgPpa)}</td>
+                    <td>{fixed(game.opponentDefensePpa)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS games (
   away_points INTEGER,
   venue TEXT,
   neutral_site BOOLEAN NOT NULL DEFAULT FALSE,
-  completed BOOLEAN NOT NULL DEFAULT FALSE
+  completed BOOLEAN NOT NULL DEFAULT FALSE,
+  opponent_defense_ppa DOUBLE PRECISION
 );
 
 CREATE TABLE IF NOT EXISTS drives (

@@ -98,6 +98,23 @@ describe("buildSnapshot", () => {
     expect(snapshot.hasOfficialPpa).toBe(true);
     expect(snapshot.havocAllowed).toBe(0.19);
   });
+
+  it("averages opponent defense ratings and skips a game with no rating", () => {
+    const games = [
+      game({ id: 1, opponentDefensePpa: -0.08 }),
+      game({ id: 2, opponentDefensePpa: 0.2 }),
+      game({ id: 3, opponentDefensePpa: null }),
+    ];
+    const snapshot = buildSnapshot(2024, [], [], games, undefined, now);
+    expect(snapshot.opponentDefensePpa).toBeCloseTo(0.06);
+    expect(snapshot.ratedGames).toBe(2);
+  });
+
+  it("leaves opponent defense empty when no game has a rating", () => {
+    const snapshot = buildSnapshot(2024, [], [], [game({ id: 1, opponentDefensePpa: null })], undefined, now);
+    expect(snapshot.opponentDefensePpa).toBeNull();
+    expect(snapshot.ratedGames).toBe(0);
+  });
 });
 
 describe("buildSplits and buildGameLog", () => {
@@ -120,6 +137,7 @@ describe("buildSplits and buildGameLog", () => {
         venue: "Memorial Stadium",
         neutralSite: false,
         completed: true,
+        opponentDefensePpa: null,
       },
     ];
     const splits = buildSplits(plays, []);
@@ -135,6 +153,24 @@ describe("buildSplits and buildGameLog", () => {
     expect(game.avgPpa).toBeCloseTo(0.35);
   });
 });
+
+function game(overrides: Partial<GameRow> & Pick<GameRow, "id">): GameRow {
+  return {
+    season: 2024,
+    week: 1,
+    seasonType: "regular",
+    startDate: "2024-09-07T23:30:00.000Z",
+    homeTeam: "Clemson",
+    awayTeam: "Wake Forest",
+    homePoints: 24,
+    awayPoints: 10,
+    venue: "Memorial Stadium",
+    neutralSite: false,
+    completed: true,
+    opponentDefensePpa: null,
+    ...overrides,
+  };
+}
 
 function play(overrides: Partial<PlayRow> & Pick<PlayRow, "id">): PlayRow {
   return {

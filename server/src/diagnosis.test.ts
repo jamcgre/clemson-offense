@@ -146,6 +146,8 @@ function season(overrides: Partial<SeasonSnapshot> & Pick<SeasonSnapshot, "seaso
     rushSuccessRate: 0.52,
     passPlays: 400,
     rushPlays: 400,
+    opponentDefensePpa: null,
+    ratedGames: 0,
     ...overrides,
   };
 }

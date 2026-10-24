@@ -65,6 +65,12 @@ export function Method() {
               pass defended. Higher is worse for the offense.
             </dd>
           </div>
+          <div>
+            <dt>Opponent defense PPA</dt>
+            <dd>
+              The opponent’s defensive PPA from CollegeFootballData: predicted points added per play by offenses facing that defense. Lower is a tougher defense. The season number is the average of games that have a rating. Games against an unrated opponent are left out.
+            </dd>
+          </div>
         </dl>
 
         <h2>The peak and the findings</h2>

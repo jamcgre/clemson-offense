@@ -31,6 +31,8 @@ export type SeasonSnapshot = {
   havocAllowed: number | null;
   passSuccessRate: number | null;
   rushSuccessRate: number | null;
+  opponentDefensePpa: number | null;
+  ratedGames: number;
 };
 
 export type Finding = {
@@ -101,4 +103,5 @@ export type GameLogRow = {
   explosiveRate: number | null;
   pointsPerDrive: number | null;
   avgPpa: number | null;
+  opponentDefensePpa: number | null;
 };

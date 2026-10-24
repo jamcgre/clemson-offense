@@ -4,7 +4,7 @@ import { TEAM } from "./constants";
 import { cfbdList } from "./cfbd";
 import { pool } from "./db";
 import { yearsFromArgv } from "./ingestYears";
-import { parseDrive, parseGame, parsePlay, parseSeasonStats } from "./parseApi";
+import { parseDrive, parseGame, parsePlay, parseSeasonStats, defenseOverallByTeam, withOpponentDefense } from "./parseApi";
 import { replaceSeason } from "./queries";
 import type { DriveRow, GameRow, PlayRow, SeasonPpaRow } from "./types";
 
@@ -71,7 +71,8 @@ async function fetchYear(year: number): Promise<YearPayload> {
     }
   }
 
-  const ppaRows = await cfbdList(`/ppa/teams?year=${year}&team=${team}`);
+  const ppaRows = await cfbdList(`/ppa/teams?year=${year}`);
+  const ratedGames = withOpponentDefense(games, defenseOverallByTeam(ppaRows));
   let advancedRows: Record<string, unknown>[] = [];
   try {
     advancedRows = await cfbdList(`/stats/season/advanced?year=${year}&team=${team}`);
@@ -81,7 +82,7 @@ async function fetchYear(year: number): Promise<YearPayload> {
   }
 
   return {
-    games,
+    games: ratedGames,
     drives,
     plays: dedupe(plays),
     season: parseSeasonStats(year, ppaRows, advancedRows),

@@ -51,6 +51,7 @@ export type GameRow = {
   venue: string | null;
   neutralSite: boolean;
   completed: boolean;
+  opponentDefensePpa: number | null;
 };
 
 export type SeasonPpaRow = {
@@ -105,6 +106,8 @@ export type SeasonSnapshot = {
   rushSuccessRate: number | null;
   passPlays: number;
   rushPlays: number;
+  opponentDefensePpa: number | null;
+  ratedGames: number;
 };
 
 export type SplitRow = RateBlock & {
@@ -138,6 +141,7 @@ export type GameLogRow = {
   explosiveRate: number | null;
   pointsPerDrive: number | null;
   avgPpa: number | null;
+  opponentDefensePpa: number | null;
 };
 
 export type Dataset = {

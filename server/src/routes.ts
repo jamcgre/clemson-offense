@@ -3,7 +3,7 @@ import { buildGameLog, buildSplits, buildSnapshot, seasonExists } from "./aggreg
 import { explainDatabaseError, queryDataset } from "./queries";
 import type { Dataset } from "./types";
 import { diagnose } from "./diagnosis";
-import { getNonGarbageTimeData, isGarbageTime } from "./metrics";
+import { getNonGarbageTimeData } from "./metrics";
 import type { SeasonSnapshot } from "./types";
 
 const CACHE_MS = 15_000;

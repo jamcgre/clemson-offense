@@ -58,6 +58,7 @@ export async function replaceSeason(
         "venue",
         "neutral_site",
         "completed",
+        "opponent_defense_ppa",
       ],
       data.games.map((game) => [
         game.id,
@@ -72,6 +73,7 @@ export async function replaceSeason(
         game.venue,
         game.neutralSite,
         game.completed,
+        game.opponentDefensePpa,
       ]),
     );
     await insertRows(
@@ -231,6 +233,7 @@ function mapGame(row: Record<string, unknown>): GameRow {
     venue: toText(row.venue),
     neutralSite: toBoolean(row.neutral_site),
     completed: toBoolean(row.completed),
+    opponentDefensePpa: toNumber(row.opponent_defense_ppa),
   };
 }
 

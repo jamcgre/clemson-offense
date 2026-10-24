@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { classifyPlay, drivePoints, driveScored, isExplosive, isSuccessful, pointsPerDrive } from "./metrics";
-import type { DriveRow } from "./types";
+import { classifyPlay, drivePoints, driveScored, getNonGarbageTimeData, isExplosive, isGarbageTime, isSuccessful, pointsPerDrive } from "./metrics";
+import type { DriveRow, PlayRow } from "./types";
 
 describe("classifyPlay", () => {
   it("keeps rushes and passes, including sacks", () => {
@@ -69,6 +69,37 @@ describe("isExplosive", () => {
   });
 });
 
+describe("garbage time", () => {
+  it("marks the fourth quarter or later when Clemson leads by 17 or more", () => {
+    expect(isGarbageTime({ startOffenseScore: 31, startDefenseScore: 14, startPeriod: 4 })).toBe(true);
+    expect(isGarbageTime({ startOffenseScore: 31, startDefenseScore: 14, startPeriod: 5 })).toBe(true);
+    expect(isGarbageTime({ startOffenseScore: 30, startDefenseScore: 14, startPeriod: 4 })).toBe(false);
+    expect(isGarbageTime({ startOffenseScore: 31, startDefenseScore: 14, startPeriod: 3 })).toBe(false);
+    expect(isGarbageTime({ startOffenseScore: 14, startDefenseScore: 31, startPeriod: 4 })).toBe(false);
+  });
+
+  it("returns null when the score or period is missing", () => {
+    expect(isGarbageTime({ startOffenseScore: 31, startDefenseScore: null, startPeriod: 4 })).toBeNull();
+    expect(isGarbageTime({ startOffenseScore: 31, startDefenseScore: 14, startPeriod: null })).toBeNull();
+  });
+
+  it("drops garbage-time drives and their plays, and keeps a drive with a missing score", () => {
+    const competitive = drive({ id: "keep", startOffenseScore: 7, startDefenseScore: 7, startPeriod: 4 });
+    const garbage = drive({ id: "drop", startOffenseScore: 31, startDefenseScore: 14, startPeriod: 4 });
+    const unknown = drive({ id: "unknown", startOffenseScore: null, startDefenseScore: null, startPeriod: null });
+    const plays = [
+      play({ id: "p1", driveId: "keep" }),
+      play({ id: "p2", driveId: "drop" }),
+      play({ id: "p3", driveId: null }),
+    ];
+
+    const filtered = getNonGarbageTimeData([competitive, garbage, unknown], plays);
+
+    expect(filtered.drives.map((row) => row.id)).toEqual(["keep", "unknown"]);
+    expect(filtered.plays.map((row) => row.id)).toEqual(["p1"]);
+  });
+});
+
 function drive(overrides: Partial<DriveRow> & Pick<DriveRow, "id">): DriveRow {
   return {
     gameId: 1,
@@ -83,7 +114,30 @@ function drive(overrides: Partial<DriveRow> & Pick<DriveRow, "id">): DriveRow {
     endYardsToGoal: 70,
     startOffenseScore: 0,
     endOffenseScore: 0,
+    startDefenseScore: 0,
+    startPeriod: 1,
     scoring: false,
+    ...overrides,
+  };
+}
+
+function play(overrides: Partial<PlayRow> & Pick<PlayRow, "id">): PlayRow {
+  return {
+    gameId: 1,
+    driveId: "d1",
+    season: 2024,
+    week: 1,
+    offense: "Clemson",
+    defense: "Wake Forest",
+    down: 1,
+    distance: 10,
+    yardsToGoal: 75,
+    yardsGained: 4,
+    playType: "Rush",
+    playText: "Rush",
+    ppa: 0.1,
+    scoring: false,
+    period: 1,
     ...overrides,
   };
 }

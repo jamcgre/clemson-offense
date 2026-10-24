@@ -64,6 +64,8 @@ export function buildSnapshot(
   const touchdowns = trips.filter((drive) => driveScored(drive.driveResult) === "td").length;
   const record = recordFromGames(games);
   const officialPpa = ppa?.overall ?? null;
+  const ratedGames = games.filter((game) => game.opponentDefensePpa != null).length;
+  const opponentDefensePpa = ratedGames > 0 ? games.reduce((sum, game) => sum + (game.opponentDefensePpa ?? 0), 0) / ratedGames : null;
 
   return {
     season,
@@ -89,6 +91,8 @@ export function buildSnapshot(
     rushSuccessRate: rush.successRate,
     passPlays: pass.plays,
     rushPlays: rush.plays,
+    opponentDefensePpa: opponentDefensePpa,
+    ratedGames: ratedGames,
   };
 }
 
@@ -140,6 +144,7 @@ export function buildGameLog(games: GameRow[], plays: PlayRow[], drives: DriveRo
       explosiveRate: rates.explosiveRate,
       pointsPerDrive: pointsPerDrive(gameDrives),
       avgPpa: rates.avgPpa,
+      opponentDefensePpa: game.opponentDefensePpa,
     };
   });
 }
