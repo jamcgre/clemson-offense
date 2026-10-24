@@ -48,6 +48,24 @@ The Docker database user and password in `docker-compose.yml` are for this local
 
 If you change `server/src/schema.sql` after the first run, reset the volume with `docker compose down -v` and ingest again.
 
+## Publish
+
+The public site is one Node process. In production it serves the built React app and the API on the same port, and it keeps up to five Postgres connections. `render.yaml` describes a small [Render](https://render.com) web service plus a Postgres database. That is enough for light traffic.
+
+1. Commit and push this repo.
+2. In Render, create a Blueprint and select the repo. Set `CFBD_API_KEY` when it asks. The key is only needed later, when the live season is refreshed.
+3. Copy the local database into Render instead of ingesting again. The CollegeFootballData monthly quota is already used up. From this folder, with the Render external database URL:
+
+```bash
+docker exec clemson-offense-db pg_dump -U clemson -d clemson_offense --no-owner --no-acl -f /tmp/clemson.sql
+docker cp clemson-offense-db:/tmp/clemson.sql clemson.sql
+docker run --rm -v "%cd%:/dump" postgres:16-alpine psql "RENDER_DATABASE_URL" -f /dump/clemson.sql
+```
+
+On PowerShell, replace `%cd%` with `${PWD}`.
+
+Do not commit `clemson.sql`. After the quota resets, refresh 2024–2026 against the hosted database with `DATABASE_URL` set to the Render URL and `npm run ingest -w server -- 2024 2025 2026`. The Sunday task on this PC still updates the local database only.
+
 ## Pages
 
 - **Overview** shows the season trend and a table of every season.

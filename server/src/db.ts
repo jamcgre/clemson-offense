@@ -11,11 +11,14 @@ dotenv.config({ path: envPath });
 const { Pool } = pg;
 
 const defaultDatabaseUrl = "postgres://clemson:clemson@127.0.0.1:5433/clemson_offense";
+const connectionString = process.env.DATABASE_URL ?? defaultDatabaseUrl;
+const localDatabase = /@(127\.0\.0\.1|localhost)(:|\/)/.test(connectionString);
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL ?? defaultDatabaseUrl,
+  connectionString,
   connectionTimeoutMillis: 3000,
-  max: 1,
+  max: Number(process.env.PG_POOL_MAX ?? (process.env.NODE_ENV === "production" ? 5 : 1)),
+  ssl: localDatabase ? undefined : { rejectUnauthorized: false },
 });
 
 pool.on("error", (error) => {
@@ -53,7 +56,9 @@ export function friendlyDatabaseMessage(error: unknown): string {
     message.includes("timeout") ||
     message.includes("connect E")
   ) {
-    return "Postgres is not running. Start it with docker compose up -d from the project root.";
+    return process.env.NODE_ENV === "production"
+      ? "The database could not be reached."
+      : "Postgres is not running. Start it with docker compose up -d from the project root.";
   }
   if (
     code === "28P01" ||

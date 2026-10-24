@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: clemson-offense
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/seasons
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CFBD_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: clemson-offense-db
+          property: connectionString
+
+databases:
+  - name: clemson-offense-db
+    databaseName: clemson_offense
+    user: clemson

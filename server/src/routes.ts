@@ -1,3 +1,5 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import { buildGameLog, buildSplits, buildSnapshot, seasonExists } from "./aggregate";
 import { explainDatabaseError, queryDataset } from "./queries";
@@ -118,6 +120,15 @@ export function createApp() {
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Not found" });
   });
+
+  if (process.env.NODE_ENV === "production") {
+    const clientDist = join(dirname(fileURLToPath(import.meta.url)), "../../client/dist");
+    app.use(express.static(clientDist));
+    app.use((req, res, next) => {
+      if (req.method !== "GET" || req.path.startsWith("/api")) return next();
+      res.sendFile(join(clientDist, "index.html"));
+    });
+  }
 
   return app;
 }
