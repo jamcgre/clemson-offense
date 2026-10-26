@@ -56,13 +56,13 @@ The public site is one Node process. In production it serves the built React app
 2. In Render, create a Blueprint and select the repo. Set `CFBD_API_KEY` when it asks. The key is only needed later, when the live season is refreshed.
 3. Copy the local database into Render instead of ingesting again. The CollegeFootballData monthly quota is already used up. From this folder, with the Render external database URL:
 
-```bash
+```powershell
 docker exec clemson-offense-db pg_dump -U clemson -d clemson_offense --no-owner --no-acl -f /tmp/clemson.sql
 docker cp clemson-offense-db:/tmp/clemson.sql clemson.sql
-docker run --rm -v "%cd%:/dump" postgres:16-alpine psql "RENDER_DATABASE_URL" -f /dump/clemson.sql
+docker run --rm -v "${PWD}:/dump" postgres:16-alpine psql "RENDER_DATABASE_URL" -f /dump/clemson.sql
 ```
 
-On PowerShell, replace `%cd%` with `${PWD}`.
+Use the external database URL, and add `?sslmode=require` at the end of it.
 
 Do not commit `clemson.sql`. After the quota resets, refresh 2024–2026 against the hosted database with `DATABASE_URL` set to the Render URL and `npm run ingest -w server -- 2024 2025 2026`. The Sunday task on this PC still updates the local database only.
 
